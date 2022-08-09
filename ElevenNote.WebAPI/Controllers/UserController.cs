@@ -20,20 +20,34 @@ namespace ElevenNote.WebAPI.Controllers
         }
 
         [HttpPost("Register")]
-    public async Task<IActionResult> RegisterUser([FromBody] UserRegister model)
-    {
-        if (!ModelState.IsValid)
+        public async Task<IActionResult> RegisterUser([FromBody] UserRegister model)
         {
-            return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var registerResult = await _service.RegisterUserAsync(model);
+            if (registerResult)
+            {
+                return Ok("User was registered.");
+            }
+
+            return BadRequest("User could not be registered.");
         }
 
-        var registerResult = await _service.RegisterUserAsync(model);
-        if (registerResult)
+        [HttpGet("{userId:int}")]
+        public async Task<IActionResult> GetById([FromRoute] int userId)
         {
-            return Ok("User was registered.");
+            var UserDetail = await _service.GetUserByIdAsync(userId);
+            
+            if (UserDetail is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(UserDetail);
         }
 
-        return BadRequest("User could not be registered.");
-    }
     }
 }
